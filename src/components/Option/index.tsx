@@ -3,16 +3,13 @@ import {
   Canvas, 
   Skia,
   Path,
-  useValue,
-  runTiming,
   BlurMask,
   Circle,
-  Easing
 } from '@shopify/react-native-skia'
+import { useSharedValue, useAnimatedReaction, withTiming, useDerivedValue, Easing } from "react-native-reanimated";
 
 import { styles } from './styles'
 import { THEME } from '../../styles/theme'
-import { useEffect } from 'react'
 
 type Props = TouchableOpacityProps & {
   checked: boolean
@@ -21,26 +18,34 @@ type Props = TouchableOpacityProps & {
 
 const CHECK_SIZE = 28
 const CHECK_STROKE = 2
+const RADIUS = (CHECK_SIZE - CHECK_STROKE) / 2
+const CENTER_CIRCLE = RADIUS / 2
 
 export function Option({ checked, title, ...rest }: Props) {
-  const percentage = useValue(0)
-  const circle = useValue(0)
+  const percentage = useSharedValue(0)
+  const circle = useSharedValue(0)
 
-  const RADIUS = (CHECK_SIZE - CHECK_STROKE) / 2
-  const CENTER_CIRCLE = RADIUS / 2
+  const skiaPercentage = useDerivedValue(() => {
+    return percentage.value;
+  }, [percentage]);
+
+  const skiaCircle = useDerivedValue(() => {
+    return circle.value;
+  }, [circle]);
 
   const path = Skia.Path.Make()
   path.addCircle(CHECK_SIZE, CHECK_SIZE, RADIUS)
 
-  useEffect(() => {
-    if( checked ){
-      runTiming(percentage, 1, { duration: 700 })
-      runTiming(circle, CENTER_CIRCLE, { easing: Easing.bounce })
-    } else {
-      runTiming(percentage, 0, { duration: 700 })
-      runTiming(circle, 0, { duration: 300 })
-    }
-  }, [checked])
+  useAnimatedReaction(
+    () => checked,
+    (isChecked) => {
+      percentage.value = withTiming(isChecked ? 1 : 0, { duration: 700 });
+      circle.value = withTiming(isChecked ? CENTER_CIRCLE : 0, {
+        easing: Easing.linear,
+      });
+    },
+    [checked]
+  );
 
   return (
     <TouchableOpacity
@@ -63,7 +68,7 @@ export function Option({ checked, title, ...rest }: Props) {
           style="stroke"
           strokeWidth={CHECK_STROKE}
           start={0}
-          end={percentage}
+          end={skiaPercentage}
         >
           <BlurMask blur={1} style="solid"/>
         </Path>
@@ -71,7 +76,7 @@ export function Option({ checked, title, ...rest }: Props) {
         <Circle
           cx={CHECK_SIZE}
           cy={CHECK_SIZE}
-          r={circle}
+          r={skiaCircle}
           color={THEME.COLORS.BRAND_LIGHT}
         >
           <BlurMask blur={1} style="solid"/>

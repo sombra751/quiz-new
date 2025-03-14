@@ -2,6 +2,7 @@
   "expo": {
     "name": "ignitequiz",
     "slug": "ignitequiz",
+    "scheme": "ignitequiz",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -18,16 +19,26 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.matheus.ignitequiz"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
-      }
+      },
+      "package": "com.matheus.ignitequiz"
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "911d32d7-a935-4315-ad12-0aecfa7be082"
+      }
+    },
+    "plugins": [
+      "expo-font"
+    ]
   }
 }
